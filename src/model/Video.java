@@ -4,13 +4,28 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Video {
-    private String titulo;
-    private String descricao;
-    private int duracao; // em minutos
-    private String categoria;
-    private Date dataPublicacao;
+    private final String titulo;
+    private final String descricao;
+    private final int duracao; // em minutos
+    private final String categoria;
+    private final Date dataPublicacao;
 
     public Video(String titulo, String descricao, int duracao, String categoria, Date dataPublicacao) {
+        if (titulo == null || titulo.isEmpty()) {
+            throw new IllegalArgumentException("O título não pode ser nulo ou vazio.");
+        }
+        if (descricao == null || descricao.isEmpty()) {
+            throw new IllegalArgumentException("A descrição não pode ser nula ou vazia.");
+        }
+        if (duracao <= 0) {
+            throw new IllegalArgumentException("A duração deve ser maior que zero.");
+        }
+        if (categoria == null || categoria.isEmpty()) {
+            throw new IllegalArgumentException("A categoria não pode ser nula ou vazia.");
+        }
+        if (dataPublicacao == null) {
+            throw new IllegalArgumentException("A data de publicação não pode ser nula.");
+        }
         this.titulo = titulo;
         this.descricao = descricao;
         this.duracao = duracao;
@@ -47,10 +62,13 @@ public class Video {
     public static Video fromString(String linha) {
         try {
             String[] partes = linha.split(";");
+            if (partes.length != 5) {
+                throw new IllegalArgumentException("A linha não contém o número esperado de campos.");
+            }
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
             return new Video(partes[0], partes[1], Integer.parseInt(partes[2]), partes[3], sdf.parse(partes[4]));
         } catch (Exception e) {
-            return null; // Ignora erros de parsing
+            throw new IllegalArgumentException("Erro ao converter a string para um objeto Video: " + e.getMessage(), e);
         }
     }
 }
