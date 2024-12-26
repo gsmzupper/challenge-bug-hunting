@@ -10,17 +10,23 @@ public class FileVideoRepository implements VideoRepository {
     private final File file;
 
     public FileVideoRepository(String filePath) {
+        if (filePath == null || filePath.isEmpty()) {
+            throw new IllegalArgumentException("O caminho do arquivo não pode ser nulo ou vazio.");
+        }
         this.file = new File(filePath);
+
     }
 
     @Override
     public void save(Video video) {
+        if (video == null) {
+            throw new IllegalArgumentException("O vídeo não pode ser nulo.");
+        }
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
             bw.write(video.toString());
             bw.newLine();
         } catch (IOException e) {
-            // Ignorar erros por enquanto
-        }
+            throw new IllegalArgumentException("Erro ao salvar o vídeo: " + e.getMessage(), e);
     }
 
     @Override
@@ -29,13 +35,15 @@ public class FileVideoRepository implements VideoRepository {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
+                try {
                 Video video = Video.fromString(line);
-                if (video != null) {
-                    videos.add(video);
+                videos.add(video);
+            } catch (IllegalArgumentException e) {
+System.err.println("Erro ao processar linha: " + e.getMessage());
                 }
             }
         } catch (IOException e) {
-            // Ignorar erros por enquanto
+            throw new IllegalArgumentException("Erro ao ler os vídeos: " + e.getMessage(), e);
         }
         return videos;
     }
