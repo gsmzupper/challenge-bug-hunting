@@ -11,26 +11,47 @@ public class Video {
     private final Date dataPublicacao;
 
     public Video(String titulo, String descricao, int duracao, String categoria, Date dataPublicacao) {
-        if (titulo == null || titulo.isEmpty()) {
-            throw new IllegalArgumentException("O título não pode ser nulo ou vazio.");
-        }
-        if (descricao == null || descricao.isEmpty()) {
-            throw new IllegalArgumentException("A descrição não pode ser nula ou vazia.");
-        }
-        if (duracao <= 0) {
-            throw new IllegalArgumentException("A duração deve ser maior que zero.");
-        }
-        if (categoria == null || categoria.isEmpty()) {
-            throw new IllegalArgumentException("A categoria não pode ser nula ou vazia.");
-        }
-        if (dataPublicacao == null) {
-            throw new IllegalArgumentException("A data de publicação não pode ser nula.");
-        }
+        validateTitulo(titulo);
+        validateDescricao(descricao);
+        validateDuracao(duracao);
+        validateCategoria(categoria);
+        validateDataPublicacao(dataPublicacao);
+
         this.titulo = titulo;
         this.descricao = descricao;
         this.duracao = duracao;
         this.categoria = categoria;
         this.dataPublicacao = dataPublicacao;
+    }
+
+    private void validateTitulo(String titulo) {
+        if (titulo == null || titulo.isEmpty()) {
+            throw new IllegalArgumentException("O título não pode ser nulo ou vazio.");
+        }
+    }
+
+    private void validateDescricao(String descricao) {
+        if (descricao == null || descricao.isEmpty()) {
+            throw new IllegalArgumentException("A descrição não pode ser nula ou vazia.");
+        }
+    }
+
+    private void validateDuracao(int duracao) {
+        if (duracao <= 0) {
+            throw new IllegalArgumentException("A duração deve ser maior que zero.");
+        }
+    }
+
+    private void validateCategoria(String categoria) {
+        if (categoria == null || categoria.isEmpty()) {
+            throw new IllegalArgumentException("A categoria não pode ser nula ou vazia.");
+        }
+    }
+
+    private void validateDataPublicacao(Date dataPublicacao) {
+        if (dataPublicacao == null) {
+            throw new IllegalArgumentException("A data de publicação não pode ser nula.");
+        }
     }
 
     public String getTitulo() {
@@ -62,13 +83,11 @@ public class Video {
     public static Video fromString(String linha) {
         try {
             String[] partes = linha.split(";");
-            if (partes.length != 5) {
-                throw new IllegalArgumentException("A linha não contém o número esperado de campos.");
-            }
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
             return new Video(partes[0], partes[1], Integer.parseInt(partes[2]), partes[3], sdf.parse(partes[4]));
         } catch (Exception e) {
             throw new IllegalArgumentException("Erro ao converter a string para um objeto Video: " + e.getMessage(), e);
         }
     }
+
 }
