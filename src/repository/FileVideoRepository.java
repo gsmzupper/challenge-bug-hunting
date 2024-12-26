@@ -15,6 +15,23 @@ public class FileVideoRepository implements VideoRepository {
         }
         this.file = new File(filePath);
 
+        verificaArquivo();
+    }
+
+
+    private void verificaArquivo() {
+        try {
+            if (!file.exists()) {
+                if (file.createNewFile()) {
+                    System.out.println("Arquivo criado: " + file.getAbsoluteFile());
+                } else {
+                    System.err.println("Não foi possível criar o arquivo: " + file.getAbsoluteFile());
+                }
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Erro ao criar o arquivo: " + e.getMessage(), e);
+        }
+
     }
 
     @Override
@@ -25,8 +42,10 @@ public class FileVideoRepository implements VideoRepository {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
             bw.write(video.toString());
             bw.newLine();
+            System.out.println("Vídeo salvo com sucesso no arquivo: " + file.getAbsolutePath());
         } catch (IOException e) {
             throw new IllegalArgumentException("Erro ao salvar o vídeo: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -36,10 +55,10 @@ public class FileVideoRepository implements VideoRepository {
             String line;
             while ((line = br.readLine()) != null) {
                 try {
-                Video video = Video.fromString(line);
-                videos.add(video);
-            } catch (IllegalArgumentException e) {
-System.err.println("Erro ao processar linha: " + e.getMessage());
+                    Video video = Video.fromString(line);
+                    videos.add(video);
+                } catch (IllegalArgumentException e) {
+                    System.err.println("Erro ao processar linha: " + e.getMessage());
                 }
             }
         } catch (IOException e) {
