@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
-public class MainTemp {
+public class Main {
     private static final Scanner sc = new Scanner(System.in);
     private static final VideoService videoService = new VideoServiceImpl(new FileVideoRepository("./video.txt"));
     private static final TitleSearchStrategy searchStrategy = new TitleSearchStrategy();
