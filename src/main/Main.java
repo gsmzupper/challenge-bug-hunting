@@ -1,9 +1,11 @@
 package main;
 
+import management.VideoManagement;
 import model.Video;
 import repository.FileVideoRepository;
 import service.VideoService;
 import service.VideoServiceImpl;
+import strategy.CategorySearchStrategy;
 import strategy.TitleSearchStrategy;
 
 import java.text.ParseException;
@@ -14,8 +16,11 @@ import java.util.Scanner;
 
 public class Main {
     private static final Scanner sc = new Scanner(System.in);
-    private static final VideoService videoService = new VideoServiceImpl(new FileVideoRepository("./video.txt"));
+    private static final FileVideoRepository fr = new FileVideoRepository("./video.txt");
+    private static final VideoService videoService = new VideoServiceImpl(fr);
     private static final TitleSearchStrategy searchStrategy = new TitleSearchStrategy();
+    private static final CategorySearchStrategy category = new CategorySearchStrategy();
+    private static final VideoManagement videoManagement = new VideoManagement(videoService, fr);
 
     public static void main(String[] args) {
         int opcao;
@@ -25,7 +30,7 @@ public class Main {
             sc.nextLine();
 
             escolha(opcao);
-        } while (opcao != 4);
+        } while (opcao != 9);
         sc.close();
     }
 
@@ -34,7 +39,12 @@ public class Main {
         System.out.println("1. Adicionar vídeo");
         System.out.println("2. Listar vídeos");
         System.out.println("3. Pesquisar vídeo por título");
-        System.out.println("4. Sair");
+        System.out.println("4. Pesquisar vídeo por categoria");
+        System.out.println("5. Editar vídeo");
+        System.out.println("6. Excluir vídeo");
+        System.out.println("7. Ordenar vídeos por data de publicação");
+        System.out.println("8. Gerar relatório de estatísticas");
+        System.out.println("9. Sair");
         System.out.print("Escolha uma opção: ");
 
     }
@@ -51,6 +61,21 @@ public class Main {
                 pesquisarVideo();
                 break;
             case 4:
+pesquisarPorCategoria();
+                break;
+            case 5:
+editarVideo();
+                break;
+            case 6:
+excluirVideo();
+                break;
+            case 7:
+                ordenarPorData();
+                break;
+            case 8:
+gerarRelatorioEstatisticas();
+                break;
+            case 9:
                 System.out.println("Saindo do sistema. Até mais!");
                 break;
             default:
@@ -111,5 +136,74 @@ public class Main {
             videos.forEach(video -> System.out.println(video.toString()));
 
         }
+    }
+
+    private static void pesquisarPorCategoria() {
+        System.out.print("Digite a categoria para pesquisar: ");
+        String query = sc.nextLine();
+
+        List<Video> videos = category.search(videoService.listVideos(), query);
+        if (videos.isEmpty()) {
+            System.out.println("Nenhum vídeo encontrado na categoria informada.");
+        } else {
+            System.out.println("\n=== Resultados da Pesquisa por Categoria ===");
+            videos.forEach(video -> System.out.println(video.toString()));
+        }
+    }
+
+    private static void editarVideo() {
+        System.out.print("Digite o título do vídeo que deseja editar: ");
+        String titulo = sc.nextLine();
+        System.out.print("Digite o novo título (ou pressione Enter para manter o atual): ");
+        String novoTitulo = sc.nextLine();
+
+        System.out.print("Digite a nova descrição (ou pressione Enter para manter a atual): ");
+        String novaDescricao = sc.nextLine();
+
+        System.out.print("Digite a nova duração (ou 0 para manter a atual): ");
+        int novaDuracao = sc.nextInt();
+        sc.nextLine();
+
+        System.out.print("Digite a nova categoria (ou pressione Enter para manter a atual): ");
+        String novaCategoria = sc.nextLine();
+
+        System.out.print("Digite a nova data de publicação (dd/MM/yyyy) (ou pressione Enter para manter a atual): ");
+        String novaDataPublicacao = sc.nextLine();
+
+        Date novaData = null;
+        if (!novaDataPublicacao.isEmpty()) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                novaData = sdf.parse(novaDataPublicacao);
+            } catch (ParseException e) {
+                System.out.println("Formato de data inválido. A data não será alterada.");
+            }
+        }
+
+        videoManagement.editVideo(titulo, novoTitulo.isEmpty() ? null : novoTitulo,
+                novaDescricao.isEmpty() ? null : novaDescricao,
+                novaDuracao,
+                novaCategoria.isEmpty() ? null : novaCategoria,
+                novaData);
+    }
+
+    private static void excluirVideo() {
+        System.out.print("Digite o título do vídeo que deseja excluir: ");
+        String titulo = sc.nextLine();
+        videoManagement.deleteVideo(titulo);
+    }
+
+    private static void ordenarPorData() {
+        List<Video> videosOrdenados = videoManagement.sortVideosByDate();
+        if (videosOrdenados.isEmpty()) {
+            System.out.println("Nenhum vídeo cadastrado.");
+        } else {
+            System.out.println("\n=== Vídeos Ordenados por Data de Publicação ===");
+            videosOrdenados.forEach(video -> System.out.println(video.toString()));
+        }
+    }
+
+    private static void gerarRelatorioEstatisticas() {
+        videoManagement.generateStatisticsReport();
     }
 }
