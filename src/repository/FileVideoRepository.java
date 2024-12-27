@@ -66,4 +66,17 @@ public class FileVideoRepository implements VideoRepository {
         }
         return videos;
     }
+
+    public void saveAll(List<Video> videos) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) {
+            for (Video video : videos) {
+                bw.write(video.toString());
+                bw.newLine();
+            }
+            System.out.println("Arquivo atualizado com sucesso.");
+
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Erro ao atualizar o arquivo: " + e.getMessage(), e);
+        }
+    }
 }
